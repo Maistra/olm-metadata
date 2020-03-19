@@ -1,0 +1,42 @@
+FROM registry.access.redhat.com/ubi8/ubi:latest as manifests
+
+ARG JAEGER_BRANCH
+ARG KIALI_BRANCH
+
+# jaeger crds are not included in with the csvs, so we need to copy them over
+# jaeger crd file are not named appropriately, so we need to rename them to type.crd.yaml
+# jaeger crd files include a single crd, but below ---, which must be removed
+# jaeger 1.14.0 includes a replaces, but the csv it replaces is not in the manifests
+RUN echo "pulling Jaeger manifests from $JAEGER_BRANCH" && mkdir -p /tmp/manifests/jaeger-operator \
+    && curl -LO https://github.com/jaegertracing/jaeger-operator/archive/$JAEGER_BRANCH.tar.gz \
+    && tar -xzC /tmp/manifests/jaeger-operator --strip-components 4 -f $JAEGER_BRANCH.tar.gz */deploy/olm-catalog/jaeger-operator \
+    && mkdir -p /tmp/jaeger-crds && tar -xzC /tmp/jaeger-crds --strip-components 3 -f $JAEGER_BRANCH.tar.gz */deploy/crds/*_crd.yaml \
+    && ls /tmp/jaeger-crds \
+        | sed -e "s+\(jaegertracing\.io_\(.*\)_crd\.yaml\)+/tmp/jaeger-crds/\1 /tmp/jaeger-crds/\2.crd.yaml+" \
+        | xargs -rn 2 mv \
+    && find /tmp/jaeger-crds -type f | xargs -rn 1 sed -i -e "/---/d" \
+    && sed -i -e "/^ *replaces:/d" /tmp/manifests/jaeger-operator/1.14.0/jaeger-operator.v1.14.0.clusterserviceversion.yaml \
+    && find /tmp/manifests/jaeger-operator -type d |xargs -rn 1 cp /tmp/jaeger-crds/*.crd.yaml
+
+RUN echo "pulling Kiali manifests from $KIALI_BRANCH" && mkdir -p /tmp/manifests/kiali \
+    && curl -L https://github.com/kiali/kiali/archive/$KIALI_BRANCH.tar.gz \
+        | tar -xzC /tmp/manifests/kiali --strip-components 4 */operator/manifests/kiali-community
+
+
+
+FROM quay.io/operator-framework/upstream-registry-builder as builder
+
+COPY manifests manifests/maistra
+COPY --from=manifests /tmp/manifests manifests
+
+RUN ./bin/initializer -o ./bundles.db
+
+
+
+FROM scratch
+COPY --from=builder /build/bundles.db /bundles.db
+COPY --from=builder /build/bin/registry-server /registry-server
+COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
+EXPOSE 50051
+ENTRYPOINT ["/registry-server"]
+CMD ["--database", "bundles.db"]
