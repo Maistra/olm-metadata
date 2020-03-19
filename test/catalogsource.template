@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: maistra-manifests
+  namespace: openshift-marketplace
+spec:
+  displayName: Maistra Operators
+  publisher: Maistra
+  sourceType: grpc
+  image: REGISTRY_IMAGE

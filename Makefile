@@ -16,7 +16,10 @@
 
 MAISTRA_VERSION ?= 1.1.0
 IMAGE           ?= docker.io/maistra/istio-ubi8-operator-metadata:${MAISTRA_VERSION}
+REGISTRY_IMAGE  ?= docker.io/maistra/maistra-registry:latest
 CONTAINER_CLI   ?= docker
+JAEGER_BRANCH   ?= v1.17.1
+KIALI_BRANCH    ?= v1.12
 
 # Override to use a specific fork
 MAISTRA_REPO     ?= Maistra/istio-operator
@@ -51,3 +54,13 @@ update-csvs:
 .PHONY: image
 image:
 	${CONTAINER_CLI} build --no-cache -t "${IMAGE}" "${SOURCE_DIR}"
+
+################################################################################
+# registry-image builds a manifest registry image and outputs a
+# configsource.yaml into ./tmp/_output/ for installing the image into an
+# OpenShift cluster.
+################################################################################
+.PHONY: registry-image
+registry-image:
+	${CONTAINER_CLI} build --pull-always --no-cache --build-arg JAEGER_BRANCH=${JAEGER_BRANCH} --build-arg KIALI_BRANCH=${KIALI_BRANCH} -t "${REGISTRY_IMAGE}" -f "${SOURCE_DIR}/test/Dockerfile.registry" "${SOURCE_DIR}"
+	sed -e "s+REGISTRY_IMAGE+${REGISTRY_IMAGE}+" "${SOURCE_DIR}/test/catalogsource.template" > "${OUT_DIR}/catalogsource.yaml"
