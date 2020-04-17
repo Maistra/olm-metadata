@@ -14,7 +14,7 @@
 
 -include Makefile.overrides
 
-MAISTRA_VERSION ?= 1.1.0
+MAISTRA_VERSION ?= 1.1.1
 IMAGE           ?= docker.io/maistra/istio-ubi8-operator-metadata:${MAISTRA_VERSION}
 REGISTRY_IMAGE  ?= docker.io/maistra/maistra-registry:latest
 CONTAINER_CLI   ?= docker
