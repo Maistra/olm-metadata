@@ -1,7 +1,7 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
-  name: maistraoperator.v1.1.0
+  name: maistraoperator.v2.0.0
   namespace: placeholder
   annotations:
     categories: "OpenShift Optional, Integration & Delivery"
@@ -11,54 +11,48 @@ metadata:
     description: |-
       The Maistra Operator enables you to install, configure, and manage an instance of Maistra service mesh. Maistra is based on the open source Istio project.
 
-    containerImage: maistra/istio-ubi8-operator:1.1.0
-    createdAt: 2020-04-09T19:39:10UTC
+    containerImage: maistra/istio-ubi8-operator:2.0.0
+    createdAt: 2020-11-10T03:22:53UTC
     support: Red Hat, Inc. 
-    olm.skipRange: ">=1.0.2 <1.1.0"
+    olm.skipRange: ">=1.0.2 <2.0.0"
+    operators.openshift.io/infrastructure-features: '[]'
     alm-examples: |-
       [
         {
-          "apiVersion": "maistra.io/v1",
+          "apiVersion": "maistra.io/v2",
           "kind": "ServiceMeshControlPlane",
           "metadata": {
-            "name": "basic-install",
+            "name": "basic",
             "namespace": "control-plane-namespace"
           },
           "spec": {
-            "version": "v1.1",
-            "istio": {
-              "gateways": {
-                "istio-egressgateway": {
-                  "autoscaleEnabled": false
-                },
-                "istio-ingressgateway": {
-                  "autoscaleEnabled": false,
-                  "ior_enabled": false
+            "version": "v2.0",
+            "tracing": {
+              "type": "Jaeger",
+              "sampling": 10000
+            },
+            "policy": {
+               "type": "Istiod"
+            },
+            "telemetry": {
+               "type": "Istiod"
+            },
+            "addons": {
+              "jaeger": {
+                "install": {
+                  "storage": {
+                    "type": "Memory"
+                  }
                 }
               },
-              "mixer": {
-                "policy": {
-                  "autoscaleEnabled": false
-                },
-                "telemetry": {
-                  "autoscaleEnabled": false
-                }
-              },
-              "pilot": {
-                "autoscaleEnabled": false,
-                "traceSampling": 100.0
+              "prometheus": {
+                "enabled": true
               },
               "kiali": {
                 "enabled": true
               },
               "grafana": {
                 "enabled": true
-              },
-              "tracing": {
-                "enabled": true,
-                "jaeger": {
-                  "template": "all-in-one"
-                }
               }
             }
           }
@@ -86,14 +80,14 @@ metadata:
           },
           "spec": {
             "controlPlaneRef": {
-              "name": "basic-install",
+              "name": "basic",
               "namespace": "control-plane-namespace"
             }
           }
         }
       ]
 spec:
-  version: 1.1.0
+  version: 2.0.0
   maturity: alpha
   displayName: Maistra Service Mesh
   description: |-
@@ -202,7 +196,7 @@ spec:
     url: https://github.com/Maistra/istio-operator
   - name: Bugs
     url: https://issues.redhat.com/projects/MAISTRA
-  replaces: maistraoperator.v1.0.8
+  replaces: maistraoperator.v1.1.10
   installModes:
   - type: OwnNamespace
     supported: false
@@ -212,6 +206,71 @@ spec:
     supported: false
   - type: AllNamespaces
     supported: true
+  relatedImages:
+  - name: v1_0.3scale-istio-adapter
+    image: quay.io/3scale/3scale-istio-adapter:v1.0.0
+  - name: v1_0.citadel
+    image: docker.io/maistra/citadel-ubi8:1.0.8
+  - name: v1_0.cni
+    image: docker.io/maistra/istio-cni-ubi8:1.0.8
+  - name: v1_0.galley
+    image: docker.io/maistra/galley-ubi8:1.0.8
+  - name: v1_0.grafana
+    image: docker.io/maistra/grafana-ubi8:1.0.8
+  - name: v1_0.mixer
+    image: docker.io/maistra/mixer-ubi8:1.0.8
+  - name: v1_0.pilot
+    image: docker.io/maistra/pilot-ubi8:1.0.8
+  - name: v1_0.prometheus
+    image: docker.io/maistra/prometheus-ubi8:1.0.8
+  - name: v1_0.proxy-init
+    image: docker.io/maistra/proxy-init-centos7:1.0.8
+  - name: v1_0.proxyv2
+    image: docker.io/maistra/proxyv2-ubi8:1.0.8
+  - name: v1_0.sidecar-injector
+    image: docker.io/maistra/sidecar-injector-ubi8:1.0.8
+  - name: v1_1.3scale-istio-adapter
+    image: quay.io/3scale/3scale-istio-adapter:v1.0.0
+  - name: v1_1.citadel
+    image: docker.io/maistra/citadel-ubi8:1.1.10
+  - name: v1_1.cni
+    image: docker.io/maistra/istio-cni-ubi8:1.1.10
+  - name: v1_1.galley
+    image: docker.io/maistra/galley-ubi8:1.1.10
+  - name: v1_1.grafana
+    image: docker.io/maistra/grafana-ubi8:1.1.10
+  - name: v1_1.ior
+    image: docker.io/maistra/istio-ior-ubi8:1.1.10
+  - name: v1_1.mixer
+    image: docker.io/maistra/mixer-ubi8:1.1.10
+  - name: v1_1.pilot
+    image: docker.io/maistra/pilot-ubi8:1.1.10
+  - name: v1_1.prometheus
+    image: docker.io/maistra/prometheus-ubi8:1.1.10
+  - name: v1_1.proxy-init
+    image: docker.io/maistra/proxy-init-centos7:1.1.10
+  - name: v1_1.proxyv2
+    image: docker.io/maistra/proxyv2-ubi8:1.1.10
+  - name: v1_1.sidecar-injector
+    image: docker.io/maistra/sidecar-injector-ubi8:1.1.10
+  - name: v2_0.3scale-istio-adapter
+    image: quay.io/3scale/3scale-istio-adapter:v2.0.0
+  - name: v2_0.cni
+    image: docker.io/maistra/istio-cni-ubi8:2.0.0
+  - name: v2_0.grafana
+    image: docker.io/maistra/grafana-ubi8:2.0.0
+  - name: v2_0.mixer
+    image: docker.io/maistra/mixer-ubi8:2.0.0
+  - name: v2_0.pilot
+    image: docker.io/maistra/pilot-ubi8:2.0.0
+  - name: v2_0.prometheus
+    image: docker.io/maistra/prometheus-ubi8:2.0.0
+  - name: v2_0.proxy-init
+    image: docker.io/maistra/proxy-init-centos7:2.0.0
+  - name: v2_0.proxyv2
+    image: docker.io/maistra/proxyv2-ubi8:2.0.0
+  - name: v2_0.wasm-cacher
+    image: docker.io/maistra/pilot-ubi8:2.0.0
   install:
     strategy: deployment
     spec:
@@ -219,6 +278,19 @@ spec:
       - serviceAccountName: istio-operator
         rules:
 
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - ''
+          resources:
+          - services/finalizers
+          verbs:
+          - '*'
         - apiGroups:
           - ''
           resources:
@@ -379,6 +451,14 @@ spec:
           verbs:
           - get
         - apiGroups:
+          - image.openshift.io
+          resources:
+          - imagestreams
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
           - network.openshift.io
           resources:
           - netnamespaces
@@ -437,11 +517,44 @@ spec:
             metadata:
               labels:
                 name: istio-operator
+              annotations:
+                olm.relatedImage.v1_0.3scale-istio-adapter: quay.io/3scale/3scale-istio-adapter:v1.0.0
+                olm.relatedImage.v1_0.citadel: docker.io/maistra/citadel-ubi8:1.0.8
+                olm.relatedImage.v1_0.cni: docker.io/maistra/istio-cni-ubi8:1.0.8
+                olm.relatedImage.v1_0.galley: docker.io/maistra/galley-ubi8:1.0.8
+                olm.relatedImage.v1_0.grafana: docker.io/maistra/grafana-ubi8:1.0.8
+                olm.relatedImage.v1_0.mixer: docker.io/maistra/mixer-ubi8:1.0.8
+                olm.relatedImage.v1_0.pilot: docker.io/maistra/pilot-ubi8:1.0.8
+                olm.relatedImage.v1_0.prometheus: docker.io/maistra/prometheus-ubi8:1.0.8
+                olm.relatedImage.v1_0.proxy-init: docker.io/maistra/proxy-init-centos7:1.0.8
+                olm.relatedImage.v1_0.proxyv2: docker.io/maistra/proxyv2-ubi8:1.0.8
+                olm.relatedImage.v1_0.sidecar-injector: docker.io/maistra/sidecar-injector-ubi8:1.0.8
+                olm.relatedImage.v1_1.3scale-istio-adapter: quay.io/3scale/3scale-istio-adapter:v1.0.0
+                olm.relatedImage.v1_1.citadel: docker.io/maistra/citadel-ubi8:1.1.10
+                olm.relatedImage.v1_1.cni: docker.io/maistra/istio-cni-ubi8:1.1.10
+                olm.relatedImage.v1_1.galley: docker.io/maistra/galley-ubi8:1.1.10
+                olm.relatedImage.v1_1.grafana: docker.io/maistra/grafana-ubi8:1.1.10
+                olm.relatedImage.v1_1.ior: docker.io/maistra/istio-ior-ubi8:1.1.10
+                olm.relatedImage.v1_1.mixer: docker.io/maistra/mixer-ubi8:1.1.10
+                olm.relatedImage.v1_1.pilot: docker.io/maistra/pilot-ubi8:1.1.10
+                olm.relatedImage.v1_1.prometheus: docker.io/maistra/prometheus-ubi8:1.1.10
+                olm.relatedImage.v1_1.proxy-init: docker.io/maistra/proxy-init-centos7:1.1.10
+                olm.relatedImage.v1_1.proxyv2: docker.io/maistra/proxyv2-ubi8:1.1.10
+                olm.relatedImage.v1_1.sidecar-injector: docker.io/maistra/sidecar-injector-ubi8:1.1.10
+                olm.relatedImage.v2_0.3scale-istio-adapter: quay.io/3scale/3scale-istio-adapter:v2.0.0
+                olm.relatedImage.v2_0.cni: docker.io/maistra/istio-cni-ubi8:2.0.0
+                olm.relatedImage.v2_0.grafana: docker.io/maistra/grafana-ubi8:2.0.0
+                olm.relatedImage.v2_0.mixer: docker.io/maistra/mixer-ubi8:2.0.0
+                olm.relatedImage.v2_0.pilot: docker.io/maistra/pilot-ubi8:2.0.0
+                olm.relatedImage.v2_0.prometheus: docker.io/maistra/prometheus-ubi8:2.0.0
+                olm.relatedImage.v2_0.proxy-init: docker.io/maistra/proxy-init-centos7:2.0.0
+                olm.relatedImage.v2_0.proxyv2: docker.io/maistra/proxyv2-ubi8:2.0.0
+                olm.relatedImage.v2_0.wasm-cacher: docker.io/maistra/pilot-ubi8:2.0.0
             spec:
               serviceAccountName: istio-operator
               containers:
               - name: istio-operator
-                image: maistra/istio-ubi8-operator:1.1.0
+                image: maistra/istio-ubi8-operator:2.0.0
                 ports:
                 - containerPort: 11999
                   name: validation
@@ -449,6 +562,8 @@ spec:
                   name: metrics
                 command:
                 - istio-operator
+                - --config
+                - /etc/operator/olm/config.properties
                 imagePullPolicy: Always
                 env:
                 - name: WATCH_NAMESPACE
@@ -459,92 +574,133 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: istio-operator
-                - name: ISTIO_CNI_IMAGE_V1_0
-                  value: maistra/istio-cni-ubi8:1.0.8
-                - name: ISTIO_CNI_IMAGE_V1_1
-                  value: maistra/istio-cni-ubi8:1.1.0
+                volumeMounts:
+                - name: operator-olm-config
+                  mountPath: /etc/operator/olm
+                  readOnly: true
+                - name: webhook-tls-volume
+                  readOnly: true
+                  mountPath: /tmp/k8s-webhook-server/serving-certs
+              volumes:
+              - name: operator-olm-config
+                downwardAPI:
+                  defaultMode: 420
+                  items:
+                  - fieldRef:
+                      fieldPath: metadata.annotations
+                    path: config.properties
+              - name: webhook-tls-volume
+                secret:
+                  secretName: maistra-operator-serving-cert
+                  optional: true
   customresourcedefinitions:
     owned:
     - name: servicemeshcontrolplanes.maistra.io
-      version: v1
+      version: v2
       kind: ServiceMeshControlPlane
       displayName: Istio Service Mesh Control Plane
       description: An Istio control plane installation
       specDescriptors:
-      - description: Specify the version of control control plane you want to install
-        displayName: Control Plane Version
+      - displayName: Control Plane Version
+        description: Specify the version of the control plane you want to install
         path: version
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:General'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:v2.0'
           - 'urn:alm:descriptor:com.tectonic.ui:select:v1.1'
           - 'urn:alm:descriptor:com.tectonic.ui:select:v1.0'
-      - description: Enable mTLS for communication between control plane components (galley, pilot, etc.)
-        displayName: Control Plane Security
-        path: istio.global.controlPlaneSecurityEnabled
+      - displayName: Control Plane Security
+        description: Enable mTLS for communication between control plane components
+        path: security.controlPlane.mtls
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:General'
           - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-      - description: Enable mTLS for communcation between services in the mesh
-        displayName: Data Plane Security
-        path: istio.global.mtls.enabled
+      - displayName: Install Prometheus
+        description: Set to true to install Prometheus
+        path: addons.prometheus.enabled
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:metrics'
+        - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
+      - displayName: Data Plane Security
+        description: Enable mTLS for communcation between services in the mesh
+        path: security.dataPlane.mtls
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:General'
           - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-      - description: Set to true to install Kiali
-        displayName: Install Kiali
-        path: istio.kiali.enabled
+      - displayName: Install Kiali
+        description: Set to true to install Kiali
+        path: addons.kiali.enabled
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:visualization'
           - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-      - description: Set to true to install Grafana
-        displayName: Install Grafana
-        path: istio.grafana.enabled
+      - displayName: Install Grafana
+        description: Set to true to install Grafana
+        path: addons.grafana.enabled
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:visualization'
           - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-      - description: Set to false to disable tracing
-        displayName: Install Jaeger
-        path: istio.tracing.enabled
+      - displayName: Tracing provider
+        description: Select the provider to use for tracing
+        path: tracing.type
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:tracing'
-          - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-      - description: Set template to use when installing Jaeger
-        displayName: Jaeger template
-        path: istio.tracing.jaeger.template
+          - 'urn:alm:descriptor:com.tectonic.ui:select:None'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Jaeger'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Stackdriver'
+      - displayName: Jaeger Storage Type
+        description: Set storage type for Jaeger (applies only when Jaeger is selected as the tracing provider)
+        path: addons.jaeger.install.storage.type
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:tracing'
-          - 'urn:alm:descriptor:com.tectonic.ui:fieldDependency:istio.tracing.enabled:true'
-          - 'urn:alm:descriptor:com.tectonic.ui:select:all-in-one'
-          - 'urn:alm:descriptor:com.tectonic.ui:select:production-elasticsearch'
-      - description: Set to true to install the Istio 3Scale adapter
-        displayName: Install 3Scale Adapter
-        path: threeScale.enabled
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Memory'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Elasticsearch'
+      - displayName: Type of Policy
+        description: Select "Mixer" when deploying a control plane version less than "v2.0" or when planning to install 3scale adapter
+        path: policy.type
         x-descriptors:
-          - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:API_Management'
+          - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Policy'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Istiod'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Mixer'
+      - displayName: Install 3Scale Adapter
+        description: Set to true to install the Istio 3Scale adapter (applies only when Policy type is set to Mixer)
+        path: addons.3scale.enabled
+        x-descriptors:
+          - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Policy'
           - 'urn:alm:descriptor:com.tectonic.ui:booleanSwitch'
-          - 'urn:alm:descriptor:com.tectonic.ui:advanced'
-      - description: Limits describes the minimum/maximum amount of compute resources required/allowed
-        displayName: Default Resource Requirements
-        path: istio.global.defaultResources
+      - displayName: Type of Telemetry
+        description: Select "Mixer" when deploying a control plane version less than "v2.0"
+        path: telemetry.type
         x-descriptors:
-          - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Resource_Requirements'
+          - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Telemetry'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Istiod'
+          - 'urn:alm:descriptor:com.tectonic.ui:select:Mixer'
+      - displayName: Default Resource Requirements
+        description: Set the default compute resource requests and limits for control plane components
+        path: runtime.defaults.container.resources
+        x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:resourceRequirements'
           - 'urn:alm:descriptor:com.tectonic.ui:advanced'
+      statusDescriptors:
+        - displayName: Components
+          description: Status of components deployed by this ServiceMeshControlPlane resource
+          path: readiness.components
+          x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:podStatuses"
     - name: servicemeshmembers.maistra.io
       version: v1
       kind: ServiceMeshMember
       displayName: Istio Service Mesh Member
       description: Marks the containing namespace as a member of the referenced Service Mesh
       specDescriptors:
-      - path: controlPlaneRef.namespace
+      - displayName: Namespace
         description: The namespace of the ServiceMeshControlPlane to which this namespace belongs
-        displayName: Namespace
+        path: controlPlaneRef.namespace
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Service_Mesh_Control_Plane'
           - 'urn:alm:descriptor:io.kubernetes:Namespace'
-      - path: controlPlaneRef.name
+      - displayName: Name
         description: The name of the ServiceMeshControlPlane to which this namespace belongs
-        displayName: Name
+        path: controlPlaneRef.name
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:fieldGroup:Service_Mesh_Control_Plane'
           - 'urn:alm:descriptor:com.tectonic.ui:text'
